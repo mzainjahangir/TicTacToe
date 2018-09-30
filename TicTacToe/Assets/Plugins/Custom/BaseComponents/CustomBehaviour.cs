@@ -49,6 +49,7 @@ namespace Custom
                 enabled = false;
             }
         }
+
         /// <summary>
         /// Returns the hierarchy for the transform.
         /// </summary>
