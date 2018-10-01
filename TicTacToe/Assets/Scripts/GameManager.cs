@@ -19,27 +19,53 @@ namespace Custom.Managers
     /// </summary>
     public class GameManager : CustomSingleton<GameManager>
     {
+        [Space]
+        [Header("Required Components")]
         [SerializeField] private List<GridSpace> _spaces;
 
+        [Space]
+        [Header("UI Components")]
         [SerializeField, ValueRequired] private GameObject _resultPanel;
         [SerializeField, ValueRequired] private Text _resultText;
-        
+        [SerializeField, ValueRequired] private Text _humanScoreText;
+        [SerializeField, ValueRequired] private Text _aIScoreText;
+
+        private const string HUMANSCOREKEY = "HumanScore";
+        private const string AISCOREKEY = "AIScore";
+
         private string _playerIndicator;
         private int _moveCounter;
+        private int _humanScore;
+        private int _aIScore;
+
+        protected override void Initialize()
+        {
+            base.Initialize();
+            _humanScore = PlayerPrefs.GetInt(HUMANSCOREKEY);
+            _aIScore = PlayerPrefs.GetInt(AISCOREKEY);
+            _playerIndicator = "X";
+            _resultPanel.SetActive(false);
+        }
 
         protected virtual void Start()
         {
-            _playerIndicator = "X";
-            _resultPanel.SetActive(false);
-
             foreach (var gridSpace in _spaces)
             {
                 gridSpace.Selected += GridSpace_OnSelected;
             }
+            UpdateScores();
         }
+
+        protected virtual void OnDisable()
+        {
+            PlayerPrefs.SetInt(HUMANSCOREKEY, _humanScore);
+            PlayerPrefs.SetInt(AISCOREKEY, _aIScore);
+        }
+
 
         private void GridSpace_OnSelected(object sender, SpaceEventArgs e)
         {
+            if (AiManager.Instance.AiMakingMove) return;
             MakeAMove(e.CurrentGridSpace.SpaceNumber);
             if(!_resultPanel.activeSelf)AiManager.Instance.AiTurn();
         }
@@ -125,15 +151,37 @@ namespace Custom.Managers
             }
             else
             {
-                _resultText.text = _playerIndicator + " WON!";
+                if (_playerIndicator.Equals("X"))
+                {
+                    _humanScore++;
+                    _resultText.text = "HUMAN WON!";
+                }
+                else
+                {
+                    _aIScore++;
+                    _resultText.text = "AI WON!";
+                }
+                
+                UpdateScores();
             }
 
             _resultPanel.SetActive(true);
 
+            DisableAllSpaces();
+        }
+
+        private void DisableAllSpaces()
+        {
             foreach (var gridSpace in _spaces)
             {
                 gridSpace.Disable();
             }
+        }
+
+        private void UpdateScores()
+        {
+            _humanScoreText.text = _humanScore.ToString();
+            _aIScoreText.text = _aIScore.ToString();
         }
     }
 }

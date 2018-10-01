@@ -19,19 +19,25 @@ namespace Custom.Managers
     {
         private List<int> _emptySpaces;
         private int _randomlyChosenSpot;
-        
+
+        public bool AiMakingMove { get; private set; }
+
+        /// <summary>
+        /// Mathod to make the Ai take turn.
+        /// </summary>
         public void AiTurn()
         {
             _emptySpaces = BoardManager.Instance.GetEmptyBoardSpaces();
             _randomlyChosenSpot = Random.Range(0, _emptySpaces.Count);
-            Debug.Log(_emptySpaces[_randomlyChosenSpot]);
             StartCoroutine(MakeAiMove());
         }
 
         private IEnumerator MakeAiMove()
         {
+            AiMakingMove = true;
             yield return new WaitForSeconds(1);
             GameManager.Instance.MakeAMove(_emptySpaces[_randomlyChosenSpot]);
+            AiMakingMove = false;
         }
     }
 }
