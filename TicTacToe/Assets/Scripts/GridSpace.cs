@@ -30,6 +30,7 @@ namespace Custom.UI
 
         protected virtual void Start()
         {
+            MoveText = null;
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -53,9 +54,12 @@ namespace Custom.UI
         }
     }
 
+    /// <summary>
+    /// Class responsible for passing along the space data through events.
+    /// </summary>
     public class SpaceEventArgs : EventArgs
     {
-        public GridSpace CurrentGridSpace;
+        public readonly GridSpace CurrentGridSpace;
 
         public SpaceEventArgs(GridSpace currentGridSpace)
         {

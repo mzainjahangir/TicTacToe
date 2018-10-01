@@ -9,6 +9,7 @@
 using System.Collections.Generic;
 using Custom.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Custom.Managers
 {
@@ -20,12 +21,17 @@ namespace Custom.Managers
     {
         [SerializeField] private List<GridSpace> _spaces;
 
+        [SerializeField, ValueRequired] private GameObject _resultPanel;
+        [SerializeField, ValueRequired] private Text _resultText;
+        
         private string _playerIndicator;
         private int _moveCounter;
 
         protected virtual void Start()
         {
             _playerIndicator = "X";
+            _resultPanel.SetActive(false);
+
             foreach (var gridSpace in _spaces)
             {
                 gridSpace.Selected += GridSpace_OnSelected;
@@ -93,11 +99,29 @@ namespace Custom.Managers
             {
                 EndGame();
             }
+
+            if (_moveCounter >= 9)
+            {
+                EndGame(true);
+            }
         }
 
-        private void EndGame()
+        /// <summary>
+        /// Anything neede to be done at the end of the game should be implemented here.
+        /// </summary>
+        private void EndGame(bool isDraw=false)
         {
-            Debug.Log( _playerIndicator + " Won");
+            if (isDraw)
+            {
+                _resultText.text = "DRAW!";
+            }
+            else
+            {
+                _resultText.text = _playerIndicator + " WON!";
+            }
+
+            _resultPanel.SetActive(true);
+
             foreach (var gridSpace in _spaces)
             {
                 gridSpace.Disable();
