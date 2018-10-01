@@ -18,12 +18,10 @@ namespace Custom.UI
     /// </summary>
     public class GridSpace : CustomBehaviour, IPointerClickHandler
     {
-        public int SpaceNumber { get; private set; }
-
-        public Text MoveText
+        public string MoveText
         {
-            get { return _moveText; }
-            set { _moveText = value; }
+            get { return _moveText.text; }
+            set { _moveText.text = value; }
         }
 
         [SerializeField, ValueRequired] private Text _moveText;
@@ -32,19 +30,26 @@ namespace Custom.UI
 
         protected virtual void Start()
         {
-            SpaceNumber = int.Parse(transform.name);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
             OnSelected(new SpaceEventArgs(this));
-            _moveText.raycastTarget = false;
+            Disable();
         }
 
         protected virtual void OnSelected(SpaceEventArgs e)
         {
             var handler = Selected;
             if (handler != null) handler(this, e);
+        }
+
+        /// <summary>
+        /// Method to disable the space.
+        /// </summary>
+        public void Disable()
+        {
+            _moveText.raycastTarget = false;
         }
     }
 
