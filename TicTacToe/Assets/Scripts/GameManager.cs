@@ -29,6 +29,8 @@ namespace Custom.Managers
         [SerializeField, ValueRequired] private Text _resultText;
         [SerializeField, ValueRequired] private Text _humanScoreText;
         [SerializeField, ValueRequired] private Text _aIScoreText;
+        [SerializeField, ValueRequired] private GameObject _turnIndicatorX;
+        [SerializeField, ValueRequired] private GameObject _turnIndicatorO;
 
         private const string HUMANSCOREKEY = "HumanScore";
         private const string AISCOREKEY = "AIScore";
@@ -45,6 +47,21 @@ namespace Custom.Managers
             _aIScore = PlayerPrefs.GetInt(AISCOREKEY);
             _playerIndicator = "X";
             _resultPanel.SetActive(false);
+            SetTurnIndicator();
+        }
+
+        private void SetTurnIndicator()
+        {
+            if (_playerIndicator.Equals("X"))
+            {
+                _turnIndicatorX.SetActive(true);
+                _turnIndicatorO.SetActive(false);
+            }
+            else
+            {
+                _turnIndicatorX.SetActive(false);
+                _turnIndicatorO.SetActive(true);
+            }
         }
 
         protected virtual void Start()
@@ -85,6 +102,7 @@ namespace Custom.Managers
 
             // Switch indicator for next move.
             _playerIndicator = _playerIndicator.Equals("X") ? "O" : "X";
+            SetTurnIndicator();
         }
 
         /// <summary>
