@@ -24,6 +24,11 @@ namespace Custom.UI
             set { _moveText.text = value; }
         }
 
+        public int SpaceNumber
+        {
+            get { return int.Parse(transform.name); }
+        }
+
         [SerializeField, ValueRequired] private Text _moveText;
 
         public event EventHandler<SpaceEventArgs> Selected;
@@ -36,7 +41,6 @@ namespace Custom.UI
         public void OnPointerClick(PointerEventData eventData)
         {
             OnSelected(new SpaceEventArgs(this));
-            Disable();
         }
 
         protected virtual void OnSelected(SpaceEventArgs e)
