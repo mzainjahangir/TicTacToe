@@ -40,7 +40,15 @@ namespace Custom.Managers
 
         private void GridSpace_OnSelected(object sender, SpaceEventArgs e)
         {
-            e.CurrentGridSpace.MoveText = _playerIndicator;
+            MakeAMove(e.CurrentGridSpace.SpaceNumber);
+            if(!_resultPanel.activeSelf)AiManager.Instance.AiTurn();
+        }
+
+        public void MakeAMove(int spaceNumber)
+        {
+            BoardManager.Instance.UpdateBoardPosition(spaceNumber);
+            _spaces[spaceNumber].MoveText = _playerIndicator;
+            _spaces[spaceNumber].Disable();
             _moveCounter++;
 
             // We only need to check for end of game after the 4th move.
@@ -100,7 +108,7 @@ namespace Custom.Managers
                 EndGame();
             }
 
-            if (_moveCounter >= 9)
+            if (_moveCounter > 9)
             {
                 EndGame(true);
             }
