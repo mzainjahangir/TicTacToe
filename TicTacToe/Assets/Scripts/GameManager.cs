@@ -9,6 +9,7 @@
 using System.Collections.Generic;
 using Custom.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Custom.Managers
 {
@@ -20,10 +21,17 @@ namespace Custom.Managers
     {
         [SerializeField] private List<GridSpace> _spaces;
 
-        private bool _isX;
+        [SerializeField, ValueRequired] private GameObject _resultPanel;
+        [SerializeField, ValueRequired] private Text _resultText;
+        
+        private string _playerIndicator;
+        private int _moveCounter;
 
         protected virtual void Start()
         {
+            _playerIndicator = "X";
+            _resultPanel.SetActive(false);
+
             foreach (var gridSpace in _spaces)
             {
                 gridSpace.Selected += GridSpace_OnSelected;
@@ -32,18 +40,92 @@ namespace Custom.Managers
 
         private void GridSpace_OnSelected(object sender, SpaceEventArgs e)
         {
-            if (_isX)
+            e.CurrentGridSpace.MoveText = _playerIndicator;
+            _moveCounter++;
+
+            // We only need to check for end of game after the 4th move.
+            if (_moveCounter > 4)
             {
-                e.CurrentGridSpace.MoveText.text = "X";
-                _isX = false;
+                CheckForEndOfGame();
+            }
+
+            // Switch indicator for next move.
+            _playerIndicator = _playerIndicator.Equals("X") ? "O" : "X";
+        }
+
+        /// <summary>
+        /// Checks rows, columns and diagonals to see if they are the same.
+        /// Since it's only 8 possible outcomes we are brute forcing it for now.
+        /// TODO: Figure out a better way to check for a win.
+        /// </summary>
+        private void CheckForEndOfGame()
+        {
+            if (_spaces[0].MoveText == _playerIndicator && _spaces[1].MoveText == _playerIndicator && _spaces[2].MoveText == _playerIndicator)
+            {
+                EndGame();
+            }
+
+            if (_spaces[3].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[5].MoveText == _playerIndicator)
+            {
+                EndGame();
+            }
+
+            if (_spaces[6].MoveText == _playerIndicator && _spaces[7].MoveText == _playerIndicator && _spaces[8].MoveText == _playerIndicator)
+            {
+                EndGame();
+            }
+
+            if (_spaces[0].MoveText == _playerIndicator && _spaces[3].MoveText == _playerIndicator && _spaces[6].MoveText == _playerIndicator)
+            {              
+                EndGame();
+            }              
+                           
+            if (_spaces[1].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[7].MoveText == _playerIndicator)
+            {              
+                EndGame();
+            }              
+                           
+            if (_spaces[2].MoveText == _playerIndicator && _spaces[5].MoveText == _playerIndicator && _spaces[8].MoveText == _playerIndicator)
+            {              
+                EndGame();
+            }              
+                           
+            if (_spaces[0].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[8].MoveText == _playerIndicator)
+            {              
+                EndGame();
+            }              
+                           
+            if (_spaces[2].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[6].MoveText == _playerIndicator)
+            {
+                EndGame();
+            }
+
+            if (_moveCounter >= 9)
+            {
+                EndGame(true);
+            }
+        }
+
+        /// <summary>
+        /// Anything neede to be done at the end of the game should be implemented here.
+        /// </summary>
+        private void EndGame(bool isDraw=false)
+        {
+            if (isDraw)
+            {
+                _resultText.text = "DRAW!";
             }
             else
             {
-                e.CurrentGridSpace.MoveText.text = "O";
-                _isX = true;
+                _resultText.text = _playerIndicator + " WON!";
             }
 
-            Debug.Log("Space #" + e.CurrentGridSpace.SpaceNumber + " Selected");
+            _resultPanel.SetActive(true);
+
+            foreach (var gridSpace in _spaces)
+            {
+                gridSpace.Disable();
+            }
         }
     }
 }
