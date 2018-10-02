@@ -20,7 +20,23 @@ namespace Custom.Managers
         /// This int array represents the board situation.
         /// 0 = empty, 1 = filled
         /// </summary>
-        private int[] _board = new int[9];
+        private readonly int[] _board = new int[9];
+
+        /// <summary>
+        /// Method to be called every time the player hits Restart.
+        /// </summary>
+        public void Restart()
+        {
+            ResetBoard();
+        }
+
+        private void ResetBoard()
+        {
+            for (var i = 0; i < _board.Length; i++)
+            {
+                _board[i] = 0;
+            }
+        }
 
         /// <summary>
         /// Method that figure out the empty spaces available on the board.

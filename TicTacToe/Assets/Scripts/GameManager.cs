@@ -16,6 +16,8 @@ namespace Custom.Managers
     /// <summary>
     /// Class responsible for managing everything related to
     /// the core functionality of the game.
+    /// Note: Since there are very few UI components besides the board,
+    /// I am adding their functionality in this class.
     /// </summary>
     public class GameManager : CustomSingleton<GameManager>
     {
@@ -31,7 +33,7 @@ namespace Custom.Managers
         [SerializeField, ValueRequired] private Text _aIScoreText;
         [SerializeField, ValueRequired] private GameObject _turnIndicatorX;
         [SerializeField, ValueRequired] private GameObject _turnIndicatorO;
-
+        
         private const string HUMANSCOREKEY = "HumanScore";
         private const string AISCOREKEY = "AIScore";
 
@@ -39,15 +41,33 @@ namespace Custom.Managers
         private int _moveCounter;
         private int _humanScore;
         private int _aIScore;
+        private bool _gameEnded;
 
         protected override void Initialize()
         {
             base.Initialize();
-            _humanScore = PlayerPrefs.GetInt(HUMANSCOREKEY);
-            _aIScore = PlayerPrefs.GetInt(AISCOREKEY);
             _playerIndicator = "X";
+            _moveCounter = 0;
+            LoadScores();
+            InitializeBoardSpaces();
             _resultPanel.SetActive(false);
             SetTurnIndicator();
+            _gameEnded = false;
+        }
+
+        private void InitializeBoardSpaces()
+        {
+            foreach (var space in _spaces)
+            {
+                space.MoveText = null;
+                space.Enable();
+            }
+        }
+
+        private void LoadScores()
+        {
+            _humanScore = PlayerPrefs.GetInt(HUMANSCOREKEY);
+            _aIScore = PlayerPrefs.GetInt(AISCOREKEY);
         }
 
         private void SetTurnIndicator()
@@ -75,6 +95,11 @@ namespace Custom.Managers
 
         protected virtual void OnDisable()
         {
+            SaveScore();
+        }
+
+        private void SaveScore()
+        {
             PlayerPrefs.SetInt(HUMANSCOREKEY, _humanScore);
             PlayerPrefs.SetInt(AISCOREKEY, _aIScore);
         }
@@ -84,7 +109,7 @@ namespace Custom.Managers
         {
             if (AiManager.Instance.AiMakingMove) return;
             MakeAMove(e.CurrentGridSpace.SpaceNumber);
-            if(!_resultPanel.activeSelf)AiManager.Instance.AiTurn();
+            if(!_gameEnded)AiManager.Instance.AiTurn();
         }
 
         public void MakeAMove(int spaceNumber)
@@ -103,6 +128,30 @@ namespace Custom.Managers
             // Switch indicator for next move.
             _playerIndicator = _playerIndicator.Equals("X") ? "O" : "X";
             SetTurnIndicator();
+        }
+
+        /// <summary>
+        /// Method referenced by the restart button in the editor,
+        /// used to reset the game to the beginning.
+        /// </summary>
+        public void Restart()
+        {
+            SaveScore();
+            Initialize();
+            if (AiManager.HasInstance) AiManager.Instance.Restart();
+            if (BoardManager.HasInstance) BoardManager.Instance.Restart();
+        }
+
+        /// <summary>
+        /// Method referenced by the reset scores button in the editor,
+        /// used to reset scores to 0.
+        /// </summary>
+        public void ResetScore()
+        {
+            _humanScore = 0;
+            _aIScore = 0;
+            SaveScore();
+            UpdateScores();
         }
 
         /// <summary>
@@ -152,7 +201,7 @@ namespace Custom.Managers
                 EndGame();
             }
 
-            if (_moveCounter > 9)
+            if (_moveCounter >= 9 && !_gameEnded)
             {
                 EndGame(true);
             }
@@ -163,6 +212,9 @@ namespace Custom.Managers
         /// </summary>
         private void EndGame(bool isDraw=false)
         {
+            if (!_gameEnded) _gameEnded = true;
+            else return;
+
             if (isDraw)
             {
                 _resultText.text = "DRAW!";

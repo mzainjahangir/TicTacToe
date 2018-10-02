@@ -56,6 +56,14 @@ namespace Custom.UI
         {
             _moveText.raycastTarget = false;
         }
+
+        /// <summary>
+        /// Method to Enable the space.
+        /// </summary>
+        public void Enable()
+        {
+            _moveText.raycastTarget = true;
+        }
     }
 
     /// <summary>
