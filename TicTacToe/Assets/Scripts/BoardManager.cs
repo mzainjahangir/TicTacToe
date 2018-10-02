@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////
 
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Custom.Managers
 {
@@ -16,19 +15,17 @@ namespace Custom.Managers
     /// </summary>
     public class BoardManager : CustomSingleton<BoardManager>
     {
+        #region Member Variables
+
         /// <summary>
-        /// This int array represents the board situation.
+        /// This int array represents the board current situation.
         /// 0 = empty, 1 = filled
         /// </summary>
         private readonly int[] _board = new int[9];
 
-        /// <summary>
-        /// Method to be called every time the player hits Restart.
-        /// </summary>
-        public void Restart()
-        {
-            ResetBoard();
-        }
+        #endregion
+
+        #region Private Methods
 
         private void ResetBoard()
         {
@@ -36,6 +33,18 @@ namespace Custom.Managers
             {
                 _board[i] = 0;
             }
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Method to be called every time the player hits Restart.
+        /// </summary>
+        public void Restart()
+        {
+            ResetBoard();
         }
 
         /// <summary>
@@ -61,10 +70,11 @@ namespace Custom.Managers
         /// Method to mark the board position as filled.
         /// </summary>
         /// <param name="position">The position to mark as filled.</param>
-        public void UpdateBoardPosition(int position)
+        public void FillBoardPosition(int position)
         {
-            _board[position] = 1;
+            if (_board.Length > position) _board[position] = 1;
         }
 
+        #endregion
     }
 }

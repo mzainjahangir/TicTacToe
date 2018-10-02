@@ -8,6 +8,8 @@
 
 using System.Collections.Generic;
 using Custom.UI;
+using JetBrains.Annotations;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,84 +17,61 @@ namespace Custom.Managers
 {
     /// <summary>
     /// Class responsible for managing everything related to
-    /// the core functionality of the game.
-    /// Note: Since there are very few UI components besides the board,
-    /// I am adding their functionality in this class.
+    /// the core functionality of the game. 
     /// </summary>
     public class GameManager : CustomSingleton<GameManager>
     {
+        #region Constants
+
         private const string HUMANSCOREKEY = "HumanScore";
         private const string AISCOREKEY = "AIScore";
 
+        #endregion
+
+        #region References
+
         [Space]
         [Header("Required Components")]
+
+        [Tooltip("Reference to all the 9 spaces on the board.")]
         [SerializeField] private List<GridSpace> _spaces;
 
         [Space]
         [Header("UI Components")]
-        [SerializeField, ValueRequired] private GameObject _resultPanel;
-        [SerializeField, ValueRequired] private GameObject _selectionPanel;
         [SerializeField, ValueRequired] private PlayerData _humanData;
         [SerializeField, ValueRequired] private PlayerData _aIData;
+        [SerializeField, ValueRequired] private GameObject _selectionPanel;
+        [SerializeField, ValueRequired] private GameObject _resultPanel;
         [SerializeField, ValueRequired] private Text _resultText;
 
-        private Symbol _currentSymbol;
+        #endregion
+
+        #region Member Variables
+
         private int _moveCounter;
         private int _humanScore;
         private int _aIScore;
         private bool _gameEnded;
         private Symbol _humanSymbol;
         private Symbol _aISymbol;
+        private Symbol _currentSymbol;
+
+        #endregion
+
+        #region Initializaion & Destruction
 
         protected override void Initialize()
         {
             base.Initialize();
             // In the beginning the current symbol will always be human symbol
-            // because the player is always making the first move.
+            // because the player always makes the first move in this game.
             _currentSymbol = _humanSymbol;
-
             _moveCounter = 0;
-
             LoadScores();
-
             InitializeBoardSpaces();
-
-            // Result panel is always disabled at the beginning of each new game.
             _resultPanel.SetActive(false);
-
             SetTurnIndicator();
-
             _gameEnded = false;
-        }
-
-        /// <summary>
-        /// Enables all board spaces and sets their text to null.
-        /// </summary>
-        private void InitializeBoardSpaces()
-        {
-            foreach (var space in _spaces)
-            {
-                space.MoveText = null;
-                space.Enable();
-            }
-        }
-
-        /// <summary>
-        /// Loads the scores from player preferences.
-        /// </summary>
-        private void LoadScores()
-        {
-            _humanScore = PlayerPrefs.GetInt(HUMANSCOREKEY);
-            _aIScore = PlayerPrefs.GetInt(AISCOREKEY);
-        }
-
-        /// <summary>
-        /// Sets the turn indicator on both sides.
-        /// </summary>
-        private void SetTurnIndicator()
-        {
-            _humanData.SetIndicator(_currentSymbol);
-            _aIData.SetIndicator(_currentSymbol);
         }
 
         protected virtual void Start()
@@ -109,84 +88,44 @@ namespace Custom.Managers
             SaveScore();
         }
 
-        private void SaveScore()
-        {
-            PlayerPrefs.SetInt(HUMANSCOREKEY, _humanScore);
-            PlayerPrefs.SetInt(AISCOREKEY, _aIScore);
-        }
+        #endregion
 
+        #region Private Methods
 
-        private void GridSpace_OnSelected(object sender, SpaceEventArgs e)
+        private void GridSpace_OnSelected(object sender, SpaceEventArgs spaceEventArgs)
         {
             if (AiManager.Instance.AiMakingMove) return;
-            MakeAMove(e.CurrentGridSpace.SpaceNumber);
-            if(!_gameEnded)AiManager.Instance.AiTurn();
+
+            MakeAMove(spaceEventArgs.CurrentGridSpace.SpaceNumber);
+
+            if (!_gameEnded) AiManager.Instance.AiTurn();
         }
 
-        public void MakeAMove(int spaceNumber)
+        /// <summary>
+        /// Enables all board spaces and sets their text to null.
+        /// </summary>
+        private void InitializeBoardSpaces()
         {
-            BoardManager.Instance.UpdateBoardPosition(spaceNumber);
-            _spaces[spaceNumber].MoveText = _currentSymbol.ToString();
-            _spaces[spaceNumber].Disable();
-            _moveCounter++;
-
-            // We only need to check for end of game after the 4th move.
-            if (_moveCounter > 4)
+            foreach (var space in _spaces)
             {
-                CheckForEndOfGame();
+                space.MoveText = null;
+                space.Enable();
             }
-
-            // Switch indicator for next move.
-            _currentSymbol = _currentSymbol == Symbol.X ? Symbol.O : Symbol.X;
-            SetTurnIndicator();
         }
 
-        public void SelectSymbolX()
+        /// <summary>
+        /// Sets the turn indicator on both sides.
+        /// </summary>
+        private void SetTurnIndicator()
         {
-            _humanSymbol = Symbol.X;
-            _aISymbol = Symbol.O;
-            _currentSymbol = _humanSymbol;
-            _selectionPanel.SetActive(false);
-            SetSymbolIndicators();
-        }
-
-        public void SelectSymbolO()
-        {
-            _humanSymbol = Symbol.O;
-            _aISymbol = Symbol.X;
-            _currentSymbol = _humanSymbol;
-            _selectionPanel.SetActive(false);
-            SetSymbolIndicators();
+            _humanData.SetTurnIndicator(_currentSymbol);
+            _aIData.SetTurnIndicator(_currentSymbol);
         }
 
         private void SetSymbolIndicators()
         {
             _humanData.SetSymbol(_humanSymbol);
             _aIData.SetSymbol(_aISymbol);
-        }
-
-        /// <summary>
-        /// Method referenced by the restart button in the editor,
-        /// used to reset the game to the beginning.
-        /// </summary>
-        public void Restart()
-        {
-            SaveScore();
-            Initialize();
-            if (AiManager.HasInstance) AiManager.Instance.Restart();
-            if (BoardManager.HasInstance) BoardManager.Instance.Restart();
-        }
-
-        /// <summary>
-        /// Method referenced by the reset scores button in the editor,
-        /// used to reset scores to 0.
-        /// </summary>
-        public void ResetScore()
-        {
-            _humanScore = 0;
-            _aIScore = 0;
-            SaveScore();
-            UpdateScores();
         }
 
         /// <summary>
@@ -212,25 +151,25 @@ namespace Custom.Managers
             }
 
             if (_spaces[0].MoveText == _currentSymbol.ToString() && _spaces[3].MoveText == _currentSymbol.ToString() && _spaces[6].MoveText == _currentSymbol.ToString())
-            {              
+            {
                 EndGame();
-            }              
-                           
+            }
+
             if (_spaces[1].MoveText == _currentSymbol.ToString() && _spaces[4].MoveText == _currentSymbol.ToString() && _spaces[7].MoveText == _currentSymbol.ToString())
-            {              
+            {
                 EndGame();
-            }              
-                           
+            }
+
             if (_spaces[2].MoveText == _currentSymbol.ToString() && _spaces[5].MoveText == _currentSymbol.ToString() && _spaces[8].MoveText == _currentSymbol.ToString())
-            {              
+            {
                 EndGame();
-            }              
-                           
+            }
+
             if (_spaces[0].MoveText == _currentSymbol.ToString() && _spaces[4].MoveText == _currentSymbol.ToString() && _spaces[8].MoveText == _currentSymbol.ToString())
-            {              
+            {
                 EndGame();
-            }              
-                           
+            }
+
             if (_spaces[2].MoveText == _currentSymbol.ToString() && _spaces[4].MoveText == _currentSymbol.ToString() && _spaces[6].MoveText == _currentSymbol.ToString())
             {
                 EndGame();
@@ -245,7 +184,7 @@ namespace Custom.Managers
         /// <summary>
         /// Anything neede to be done at the end of the game should be implemented here.
         /// </summary>
-        private void EndGame(bool isDraw=false)
+        private void EndGame(bool isDraw = false)
         {
             if (!_gameEnded) _gameEnded = true;
             else return;
@@ -266,7 +205,7 @@ namespace Custom.Managers
                     _aIScore++;
                     _resultText.text = "AI WON!";
                 }
-                
+
                 UpdateScores();
             }
 
@@ -289,22 +228,111 @@ namespace Custom.Managers
             _aIData.SetScore(_aIScore);
         }
 
+        #region Player Preferences
 
+        // TODO: Create a seperate class to handle the player preferences.
+
+        /// <summary>
+        /// Saves the current score to the player prefs
+        /// </summary>
+        private void SaveScore()
+        {
+            PlayerPrefs.SetInt(HUMANSCOREKEY, _humanScore);
+            PlayerPrefs.SetInt(AISCOREKEY, _aIScore);
+        }
+
+        /// <summary>
+        /// Loads the scores from player preferences.
+        /// </summary>
+        private void LoadScores()
+        {
+            _humanScore = PlayerPrefs.GetInt(HUMANSCOREKEY);
+            _aIScore = PlayerPrefs.GetInt(AISCOREKEY);
+        }
+
+        #endregion
+        
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Method that play a move on the given space.
+        /// </summary>
+        /// <param name="spaceNumber">The space number you want to play the move at.</param>
+        public void MakeAMove(int spaceNumber)
+        {
+            BoardManager.Instance.FillBoardPosition(spaceNumber);
+            _spaces[spaceNumber].MoveText = _currentSymbol.ToString();
+            _spaces[spaceNumber].Disable();
+            _moveCounter++;
+
+            // We only need to check for end of game after the 4th move.
+            if (_moveCounter > 4)
+            {
+                CheckForEndOfGame();
+            }
+
+            // Switch indicator for next move.
+            _currentSymbol = _currentSymbol == Symbol.X ? Symbol.O : Symbol.X;
+            SetTurnIndicator();
+        }
+
+        [UsedImplicitly]
+        public void SelectSymbolX()
+        {
+            _humanSymbol = Symbol.X;
+            _aISymbol = Symbol.O;
+            _currentSymbol = _humanSymbol;
+            _selectionPanel.SetActive(false);
+            SetSymbolIndicators();
+        }
+
+        [UsedImplicitly]
+        public void SelectSymbolO()
+        {
+            _humanSymbol = Symbol.O;
+            _aISymbol = Symbol.X;
+            _currentSymbol = _humanSymbol;
+            _selectionPanel.SetActive(false);
+            SetSymbolIndicators();
+        }
+
+        /// <summary>
+        /// Method referenced by the restart button in the editor,
+        /// used to reset the game to the beginning.
+        /// </summary>
+        [UsedImplicitly]
+        public void Restart()
+        {
+            SaveScore();
+            Initialize();
+            if (AiManager.HasInstance) AiManager.Instance.Restart();
+            if (BoardManager.HasInstance) BoardManager.Instance.Restart();
+        }
+
+        /// <summary>
+        /// Method referenced by the reset scores button in the editor,
+        /// used to reset scores to 0.
+        /// </summary>
+        [UsedImplicitly]
+        public void ResetScore()
+        {
+            _humanScore = 0;
+            _aIScore = 0;
+            SaveScore();
+            UpdateScores();
+        }
+
+        [UsedImplicitly]
         public void Exit()
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+            EditorApplication.isPlaying = false;
 #endif
             Application.Quit();
         }
-    }
 
-    /// <summary>
-    /// Enum to distinguish between symbols.
-    /// </summary>
-    public enum Symbol
-    {
-        X,
-        O
+        #endregion
     }
 }
