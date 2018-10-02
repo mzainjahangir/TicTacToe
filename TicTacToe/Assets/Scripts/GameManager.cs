@@ -8,6 +8,7 @@
 
 using System.Collections.Generic;
 using Custom.UI;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,29 +32,43 @@ namespace Custom.Managers
         [Space]
         [Header("UI Components")]
         [SerializeField, ValueRequired] private GameObject _resultPanel;
-        [SerializeField, ValueRequired] private Text _resultText;
+        [SerializeField, ValueRequired] private GameObject _selectionPanel;
         [SerializeField, ValueRequired] private PlayerData _humanData;
         [SerializeField, ValueRequired] private PlayerData _aIData;
+        [SerializeField, ValueRequired] private Text _resultText;
 
         private Symbol _currentSymbol;
         private int _moveCounter;
         private int _humanScore;
         private int _aIScore;
         private bool _gameEnded;
-
+        private Symbol _humanSymbol;
+        private Symbol _aISymbol;
 
         protected override void Initialize()
         {
             base.Initialize();
-            _currentSymbol = Symbol.X;
+            // In the beginning the current symbol will always be human symbol
+            // because the player is always making the first move.
+            _currentSymbol = _humanSymbol;
+
             _moveCounter = 0;
+
             LoadScores();
+
             InitializeBoardSpaces();
+
+            // Result panel is always disabled at the beginning of each new game.
             _resultPanel.SetActive(false);
+
             SetTurnIndicator();
+
             _gameEnded = false;
         }
 
+        /// <summary>
+        /// Enables all board spaces and sets their text to null.
+        /// </summary>
         private void InitializeBoardSpaces()
         {
             foreach (var space in _spaces)
@@ -63,12 +78,18 @@ namespace Custom.Managers
             }
         }
 
+        /// <summary>
+        /// Loads the scores from player preferences.
+        /// </summary>
         private void LoadScores()
         {
             _humanScore = PlayerPrefs.GetInt(HUMANSCOREKEY);
             _aIScore = PlayerPrefs.GetInt(AISCOREKEY);
         }
 
+        /// <summary>
+        /// Sets the turn indicator on both sides.
+        /// </summary>
         private void SetTurnIndicator()
         {
             _humanData.SetIndicator(_currentSymbol);
@@ -119,6 +140,30 @@ namespace Custom.Managers
             // Switch indicator for next move.
             _currentSymbol = _currentSymbol == Symbol.X ? Symbol.O : Symbol.X;
             SetTurnIndicator();
+        }
+
+        public void SelectSymbolX()
+        {
+            _humanSymbol = Symbol.X;
+            _aISymbol = Symbol.O;
+            _currentSymbol = _humanSymbol;
+            _selectionPanel.SetActive(false);
+            SetSymbolIndicators();
+        }
+
+        public void SelectSymbolO()
+        {
+            _humanSymbol = Symbol.O;
+            _aISymbol = Symbol.X;
+            _currentSymbol = _humanSymbol;
+            _selectionPanel.SetActive(false);
+            SetSymbolIndicators();
+        }
+
+        private void SetSymbolIndicators()
+        {
+            _humanData.SetSymbol(_humanSymbol);
+            _aIData.SetSymbol(_aISymbol);
         }
 
         /// <summary>
@@ -212,10 +257,10 @@ namespace Custom.Managers
             }
             else
             {
-                if (_currentSymbol.ToString().Equals("X"))
+                if (_currentSymbol == _humanSymbol)
                 {
                     _humanScore++;
-                    _resultText.text = "HUMAN WON!";
+                    _resultText.text = "YOU WON!";
                 }
                 else
                 {
@@ -246,8 +291,18 @@ namespace Custom.Managers
         }
 
 
+        public void Exit()
+        {
+#if UNITY_EDITOR
+            EditorApplication.isPlaying = false;
+#endif
+            Application.Quit();
+        }
     }
 
+    /// <summary>
+    /// Enum to distinguish between symbols.
+    /// </summary>
     public enum Symbol
     {
         X,

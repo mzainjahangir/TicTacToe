@@ -24,6 +24,7 @@ GameObject:
   - component: {fileID: 114529285419197256}
   - component: {fileID: 114907232583127278}
   - component: {fileID: 114839388407383456}
+  - component: {fileID: 95164384007895216}
   m_Layer: 5
   m_Name: Space
   m_TagString: Untagged
@@ -31,6 +32,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!95 &95164384007895216
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1530098681561726}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 638c995c362eae34588abb4d7248dcfb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!114 &114039425676811200
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -54,7 +72,7 @@ MonoBehaviour:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 225
     m_FontStyle: 1
-    m_BestFit: 0
+    m_BestFit: 1
     m_MinSize: 2
     m_MaxSize: 236
     m_Alignment: 4
@@ -90,6 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveText: {fileID: 114039425676811200}
+  _animator: {fileID: 95164384007895216}
 --- !u!114 &114907232583127278
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -23,19 +23,17 @@ namespace Custom.UI
 
         public void SetIndicator(Symbol currentSymbol)
         {
-            if (_symbolIndicator.text.Contains(currentSymbol.ToString()))
-            {
-                _turnIndicator.SetActive(true);
-            }
-            else
-            {
-                _turnIndicator.SetActive(false);
-            }
+            _turnIndicator.SetActive(_symbolIndicator.text.Contains(currentSymbol.ToString()));
         }
 
         public void SetScore(int score)
         {
             _scoreText.text = score.ToString();
+        }
+
+        public void SetSymbol(Symbol symbol)
+        {
+            _symbolIndicator.text = "[ " + symbol + " ]";
         }
     }
 }

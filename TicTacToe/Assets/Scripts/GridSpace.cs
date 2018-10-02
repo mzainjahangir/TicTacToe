@@ -30,7 +30,7 @@ namespace Custom.UI
         }
 
         [SerializeField, ValueRequired] private Text _moveText;
-
+        
         public event EventHandler<SpaceEventArgs> Selected;
 
         protected virtual void Start()

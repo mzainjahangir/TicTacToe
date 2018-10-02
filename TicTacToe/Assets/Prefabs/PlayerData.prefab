@@ -351,7 +351,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: (X)
+  m_Text: '[ X ]'
 --- !u!114 &114488038310218280
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -431,7 +431,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: HUMAN
+  m_Text: YOU
 --- !u!222 &222298007282974466
 CanvasRenderer:
   m_ObjectHideFlags: 1

@@ -17,6 +17,11 @@ namespace Custom.Managers
     /// </summary>
     public class AiManager : CustomSingleton<AiManager>
     {
+        [Range(0,5)]
+        [SerializeField] private float _aIMoveDelay;
+
+        [SerializeField, ValueRequired] private GameObject _computingMoveIndicator;
+
         private List<int> _emptySpaces;
         private int _randomlyChosenSpot;
 
@@ -38,15 +43,28 @@ namespace Custom.Managers
         public void Restart()
         {
             StopAllCoroutines();
-            AiMakingMove = false;
+            EndAiMove();
         }
 
         private IEnumerator MakeAiMove()
         {
-            AiMakingMove = true;
-            yield return new WaitForSeconds(1);
+            StartAiMove();
+            yield return new WaitForSeconds(_aIMoveDelay);
             GameManager.Instance.MakeAMove(_emptySpaces[_randomlyChosenSpot]);
+            EndAiMove();
+        }
+
+        private void StartAiMove()
+        {
+            AiMakingMove = true;
+            _computingMoveIndicator.SetActive(true);
+        }
+        private void EndAiMove()
+        {
+            _computingMoveIndicator.SetActive(false);
             AiMakingMove = false;
         }
+
+        
     }
 }
