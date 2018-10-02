@@ -8,7 +8,6 @@
 
 using System.Collections.Generic;
 using Custom.UI;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -294,7 +293,7 @@ namespace Custom.Managers
         public void Exit()
         {
 #if UNITY_EDITOR
-            EditorApplication.isPlaying = false;
+            UnityEditor.EditorApplication.isPlaying = false;
 #endif
             Application.Quit();
         }
