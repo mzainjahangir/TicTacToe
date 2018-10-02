@@ -21,6 +21,9 @@ namespace Custom.Managers
     /// </summary>
     public class GameManager : CustomSingleton<GameManager>
     {
+        private const string HUMANSCOREKEY = "HumanScore";
+        private const string AISCOREKEY = "AIScore";
+
         [Space]
         [Header("Required Components")]
         [SerializeField] private List<GridSpace> _spaces;
@@ -29,24 +32,20 @@ namespace Custom.Managers
         [Header("UI Components")]
         [SerializeField, ValueRequired] private GameObject _resultPanel;
         [SerializeField, ValueRequired] private Text _resultText;
-        [SerializeField, ValueRequired] private Text _humanScoreText;
-        [SerializeField, ValueRequired] private Text _aIScoreText;
-        [SerializeField, ValueRequired] private GameObject _turnIndicatorX;
-        [SerializeField, ValueRequired] private GameObject _turnIndicatorO;
-        
-        private const string HUMANSCOREKEY = "HumanScore";
-        private const string AISCOREKEY = "AIScore";
+        [SerializeField, ValueRequired] private PlayerData _humanData;
+        [SerializeField, ValueRequired] private PlayerData _aIData;
 
-        private string _playerIndicator;
+        private Symbol _currentSymbol;
         private int _moveCounter;
         private int _humanScore;
         private int _aIScore;
         private bool _gameEnded;
 
+
         protected override void Initialize()
         {
             base.Initialize();
-            _playerIndicator = "X";
+            _currentSymbol = Symbol.X;
             _moveCounter = 0;
             LoadScores();
             InitializeBoardSpaces();
@@ -72,16 +71,8 @@ namespace Custom.Managers
 
         private void SetTurnIndicator()
         {
-            if (_playerIndicator.Equals("X"))
-            {
-                _turnIndicatorX.SetActive(true);
-                _turnIndicatorO.SetActive(false);
-            }
-            else
-            {
-                _turnIndicatorX.SetActive(false);
-                _turnIndicatorO.SetActive(true);
-            }
+            _humanData.SetIndicator(_currentSymbol);
+            _aIData.SetIndicator(_currentSymbol);
         }
 
         protected virtual void Start()
@@ -115,7 +106,7 @@ namespace Custom.Managers
         public void MakeAMove(int spaceNumber)
         {
             BoardManager.Instance.UpdateBoardPosition(spaceNumber);
-            _spaces[spaceNumber].MoveText = _playerIndicator;
+            _spaces[spaceNumber].MoveText = _currentSymbol.ToString();
             _spaces[spaceNumber].Disable();
             _moveCounter++;
 
@@ -126,7 +117,7 @@ namespace Custom.Managers
             }
 
             // Switch indicator for next move.
-            _playerIndicator = _playerIndicator.Equals("X") ? "O" : "X";
+            _currentSymbol = _currentSymbol == Symbol.X ? Symbol.O : Symbol.X;
             SetTurnIndicator();
         }
 
@@ -161,42 +152,42 @@ namespace Custom.Managers
         /// </summary>
         private void CheckForEndOfGame()
         {
-            if (_spaces[0].MoveText == _playerIndicator && _spaces[1].MoveText == _playerIndicator && _spaces[2].MoveText == _playerIndicator)
+            if (_spaces[0].MoveText == _currentSymbol.ToString() && _spaces[1].MoveText == _currentSymbol.ToString() && _spaces[2].MoveText == _currentSymbol.ToString())
             {
                 EndGame();
             }
 
-            if (_spaces[3].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[5].MoveText == _playerIndicator)
+            if (_spaces[3].MoveText == _currentSymbol.ToString() && _spaces[4].MoveText == _currentSymbol.ToString() && _spaces[5].MoveText == _currentSymbol.ToString())
             {
                 EndGame();
             }
 
-            if (_spaces[6].MoveText == _playerIndicator && _spaces[7].MoveText == _playerIndicator && _spaces[8].MoveText == _playerIndicator)
+            if (_spaces[6].MoveText == _currentSymbol.ToString() && _spaces[7].MoveText == _currentSymbol.ToString() && _spaces[8].MoveText == _currentSymbol.ToString())
             {
                 EndGame();
             }
 
-            if (_spaces[0].MoveText == _playerIndicator && _spaces[3].MoveText == _playerIndicator && _spaces[6].MoveText == _playerIndicator)
+            if (_spaces[0].MoveText == _currentSymbol.ToString() && _spaces[3].MoveText == _currentSymbol.ToString() && _spaces[6].MoveText == _currentSymbol.ToString())
             {              
                 EndGame();
             }              
                            
-            if (_spaces[1].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[7].MoveText == _playerIndicator)
+            if (_spaces[1].MoveText == _currentSymbol.ToString() && _spaces[4].MoveText == _currentSymbol.ToString() && _spaces[7].MoveText == _currentSymbol.ToString())
             {              
                 EndGame();
             }              
                            
-            if (_spaces[2].MoveText == _playerIndicator && _spaces[5].MoveText == _playerIndicator && _spaces[8].MoveText == _playerIndicator)
+            if (_spaces[2].MoveText == _currentSymbol.ToString() && _spaces[5].MoveText == _currentSymbol.ToString() && _spaces[8].MoveText == _currentSymbol.ToString())
             {              
                 EndGame();
             }              
                            
-            if (_spaces[0].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[8].MoveText == _playerIndicator)
+            if (_spaces[0].MoveText == _currentSymbol.ToString() && _spaces[4].MoveText == _currentSymbol.ToString() && _spaces[8].MoveText == _currentSymbol.ToString())
             {              
                 EndGame();
             }              
                            
-            if (_spaces[2].MoveText == _playerIndicator && _spaces[4].MoveText == _playerIndicator && _spaces[6].MoveText == _playerIndicator)
+            if (_spaces[2].MoveText == _currentSymbol.ToString() && _spaces[4].MoveText == _currentSymbol.ToString() && _spaces[6].MoveText == _currentSymbol.ToString())
             {
                 EndGame();
             }
@@ -221,7 +212,7 @@ namespace Custom.Managers
             }
             else
             {
-                if (_playerIndicator.Equals("X"))
+                if (_currentSymbol.ToString().Equals("X"))
                 {
                     _humanScore++;
                     _resultText.text = "HUMAN WON!";
@@ -250,8 +241,16 @@ namespace Custom.Managers
 
         private void UpdateScores()
         {
-            _humanScoreText.text = _humanScore.ToString();
-            _aIScoreText.text = _aIScore.ToString();
+            _humanData.SetScore(_humanScore);
+            _aIData.SetScore(_aIScore);
         }
+
+
+    }
+
+    public enum Symbol
+    {
+        X,
+        O
     }
 }
