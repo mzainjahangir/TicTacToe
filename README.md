@@ -13,10 +13,10 @@ Developed the game in **Unity Version: 2017.4.3f1.** as part of an assignment fo
 - **Minimalistic user interface**
 
 ## Resolution
-- Tested on 1920 X 1080.
+- Tested on **1920 X 1080**.
 
 ## Platforms Supported
-- Only tested on a windows PC.
+- Only tested on a **Microsoft Windows PC**.
 
 ## Future Enhancements
 - Add a more intellignet AI (MinMax Algorithm)
