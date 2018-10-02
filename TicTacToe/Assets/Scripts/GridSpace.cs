@@ -30,7 +30,7 @@ namespace Custom.UI
         }
 
         [SerializeField, ValueRequired] private Text _moveText;
-
+        
         public event EventHandler<SpaceEventArgs> Selected;
 
         protected virtual void Start()
@@ -55,6 +55,14 @@ namespace Custom.UI
         public void Disable()
         {
             _moveText.raycastTarget = false;
+        }
+
+        /// <summary>
+        /// Method to Enable the space.
+        /// </summary>
+        public void Enable()
+        {
+            _moveText.raycastTarget = true;
         }
     }
 
